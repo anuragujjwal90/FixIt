@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FixIt - Local Service Finder</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="logo"><i class="ti ti-tools"></i> FixIt</div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="switchView('home')" id="nav-home"><i class="ti ti-home"></i> Home</button>
+    <button class="nav-btn" onclick="switchView('tracking')" id="nav-tracking"><i class="ti ti-map-pin"></i> Track</button>
+    <button class="nav-btn" onclick="switchView('history')" id="nav-history"><i class="ti ti-star"></i> Reviews</button>
+    <button class="nav-btn" onclick="switchView('dashboard')" id="nav-dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+    <button class="nav-btn" onclick="switchView('onboarding')" id="nav-onboarding"><i class="ti ti-user-check"></i> Join as Pro</button>
+    <button class="nav-btn cta" onclick="showReceipt()"><i class="ti ti-receipt"></i> Receipt</button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="ti ti-check-circle"></i> <span id="toast-msg"></span></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Title</h3>
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ===== HOME VIEW ===== -->
+<div class="view active" id="view-home">
+  <div class="hero">
+    <h1>Trusted Professionals,<br>At Your Doorstep</h1>
+    <p>Book verified local experts — plumbers, electricians, cleaners & more</p>
+    <div class="search-bar">
+      <i class="ti ti-map-pin" style="padding:8px;color:#94A3B8;font-size:18px"></i>
+      <input type="text" placeholder="Enter your location..." id="loc-input" value="Lucknow, UP">
+      <select id="cat-filter"><option>All services</option><option>Plumbing</option><option>Electrical</option><option>Cleaning</option><option>Carpentry</option><option>Painting</option><option>AC Repair</option></select>
+      <button onclick="searchProviders()"><i class="ti ti-search"></i> Search</button>
+    </div>
+    <div style="margin-top:16px;display:flex;justify-content:center;gap:16px">
+      <span style="font-size:12px;opacity:.7"><i class="ti ti-shield-check"></i> Background verified</span>
+      <span style="font-size:12px;opacity:.7"><i class="ti ti-star-filled"></i> 4.8 avg rating</span>
+      <span style="font-size:12px;opacity:.7"><i class="ti ti-clock"></i> Same-day available</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Browse by Category</div>
+    <div class="section-sub">500+ verified professionals in Lucknow</div>
+    <div class="cats-grid" id="cats-grid">
+      <!-- JS fills this -->
+    </div>
+  </div>
+
+  <div class="providers-section">
+    <div class="flex justify-between items-center mb-3">
+      <div>
+        <div class="section-title" id="providers-heading">Top Rated Providers</div>
+        <div class="section-sub" id="providers-sub">Sorted by rating and availability</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--success)">
+        <span class="live-dot"></span> Live availability
+      </div>
+    </div>
+    <div class="filters-row">
+      <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-chip" onclick="setFilter('available',this)">Available Now</button>
+      <button class="filter-chip" onclick="setFilter('top',this)">Top Rated</button>
+      <button class="filter-chip" onclick="setFilter('nearby',this)">Nearby (5km)</button>
+      <button class="filter-chip" onclick="setFilter('budget',this)">Budget Friendly</button>
+      <button class="filter-chip" onclick="setFilter('verified',this)">Verified Pro</button>
+    </div>
+    <div class="providers-grid" id="providers-grid">
+      <!-- JS fills -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOOKING VIEW ===== -->
+<div class="view" id="view-booking">
+  <div class="booking-view">
+    <button class="btn btn-outline btn-sm mb-3" onclick="switchView('home')"><i class="ti ti-arrow-left"></i> Back</button>
+    <div class="booking-steps" id="booking-steps">
+      <div class="step-dot"><div class="step-circle current" id="s1">1</div><div class="step-lbl current">Service</div></div>
+      <div class="step-dot"><div class="step-circle" id="s2">2</div><div class="step-lbl">Schedule</div></div>
+      <div class="step-dot"><div class="step-circle" id="s3">3</div><div class="step-lbl">Address</div></div>
+      <div class="step-dot"><div class="step-circle" id="s4">4</div><div class="step-lbl">Payment</div></div>
+      <div class="step-dot"><div class="step-circle" id="s5">5</div><div class="step-lbl">Confirm</div></div>
+    </div>
+    <div id="booking-content"></div>
+  </div>
+</div>
+
+<!-- ===== TRACKING VIEW ===== -->
+<div class="view" id="view-tracking">
+  <div class="tracking-view">
+    <div class="flex justify-between items-center mb-3">
+      <div><div class="section-title">Live Job Tracking</div><div class="section-sub">Booking #FX-28914 · Raj's Electrical Services</div></div>
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--accent);font-weight:700"><span class="live-dot" style="background:var(--accent)"></span> En Route</span>
+    </div>
+    <div class="map-placeholder">
+      <div class="map-pin">📍</div>
+      <div class="provider-en-route" style="position:absolute">🏍️</div>
+      <div class="home-pin">🏠</div>
+      <div class="eta-badge"><i class="ti ti-clock"></i> ETA 12 min</div>
+    </div>
+    <div class="booking-card">
+      <div class="track-status">
+        <div class="track-step done">
+          <div class="track-icon"><i class="ti ti-check" style="font-size:12px"></i></div>
+          <div class="track-content"><div class="track-title">Booking confirmed</div><div class="track-time">10:15 AM · Payment of ₹850 captured</div></div>
+        </div>
+        <div class="track-step done">
+          <div class="track-icon"><i class="ti ti-check" style="font-size:12px"></i></div>
+          <div class="track-content"><div class="track-title">Provider accepted</div><div class="track-time">10:18 AM · Rajesh Kumar accepted your request</div></div>
+        </div>
+        <div class="track-step current">
+          <div class="track-icon"><i class="ti ti-bike" style="font-size:11px"></i></div>
+          <div class="track-content"><div class="track-title">Provider en route</div><div class="track-time">Now · 12 minutes away · Chowk, Lucknow</div></div>
+        </div>
+        <div class="track-step">
+          <div class="track-icon"><i class="ti ti-home" style="font-size:11px"></i></div>
+          <div class="track-content"><div class="track-title">Arrived</div><div class="track-time">Expected 11:00 AM</div></div>
+        </div>
+        <div class="track-step">
+          <div class="track-icon"><i class="ti ti-check-circle" style="font-size:11px"></i></div>
+          <div class="track-content"><div class="track-title">Service completed</div><div class="track-time">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="booking-card" style="margin-top:16px">
+      <div class="flex justify-between items-center">
+        <div class="flex gap-2 items-center">
+          <div class="avatar" style="background:#EEF2FF;color:#3730A3;width:40px;height:40px;font-size:13px">RK</div>
+          <div><div class="font-semibold text-sm">Rajesh Kumar</div><div class="text-xs text-muted"><span class="stars">★★★★★</span> 4.9 · 342 jobs</div></div>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-outline btn-sm"><i class="ti ti-phone"></i></button>
+          <button class="btn btn-outline btn-sm"><i class="ti ti-message"></i></button>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+      <button class="btn btn-outline w-full" onclick="showToast('Cancellation policy: Free up to 30 min before visit','')"><i class="ti ti-x"></i> Cancel</button>
+      <button class="btn btn-primary w-full" onclick="showRatingModal()"><i class="ti ti-star"></i> Rate Later</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HISTORY VIEW ===== -->
+<div class="view" id="view-history">
+  <div class="history-view">
+    <div class="section-title mb-2">Service History & Reviews</div>
+    <div class="section-sub mb-3">Your completed services and provider ratings</div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD VIEW ===== -->
+<div class="view" id="view-dashboard">
+  <div class="dashboard-view">
+    <div class="dash-header">
+      <div class="dash-welcome">
+        <h2>Good morning, Rajesh 👋</h2>
+        <p>Wednesday, 22 Jun 2026 · Lucknow</p>
+      </div>
+      <div class="availability-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" checked id="avail-toggle" onchange="toggleAvailability()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="avail-label online" id="avail-label">Online</span>
+      </div>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card"><div class="metric-label">Today's Earnings</div><div class="metric-val">₹2,450</div><div class="metric-change up">↑ 18% vs yesterday</div></div>
+      <div class="metric-card"><div class="metric-label">Jobs Completed</div><div class="metric-val">5</div><div class="metric-change up">↑ 2 more than avg</div></div>
+      <div class="metric-card"><div class="metric-label">Rating</div><div class="metric-val">4.9</div><div class="metric-change up">↑ 0.1 this week</div></div>
+      <div class="metric-card"><div class="metric-label">Acceptance Rate</div><div class="metric-val">96%</div><div class="metric-change up">Top 5% providers</div></div>
+      <div class="metric-card"><div class="metric-label">Pending Requests</div><div class="metric-val">3</div><div class="metric-change" style="color:var(--warning)">● Needs attention</div></div>
+      <div class="metric-card"><div class="metric-label">This Month</div><div class="metric-val">₹48.2k</div><div class="metric-change up">↑ 22% vs last month</div></div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dash-card-title">Job Queue <button class="btn btn-outline btn-sm" onclick="showToast('All jobs loaded','')">View All</button></div>
+        <div id="job-queue"></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-title">Weekly Earnings</div>
+        <div class="earnings-bar" id="earnings-chart"></div>
+        <div style="height:20px"></div>
+        <div class="divider"></div>
+        <div class="dash-card-title mt-2">Subscription Plan</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div class="font-semibold text-sm">Pro Verified <span class="badge badge-verified">ACTIVE</span></div>
+            <div class="text-xs text-muted mt-2">Renews Jul 22 · Priority listing + badge</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="switchView('onboarding')">Manage</button>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card mt-4">
+      <div class="dash-card-title">Availability Calendar</div>
+      <div id="avail-calendar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ONBOARDING VIEW ===== -->
+<div class="view" id="view-onboarding">
+  <div class="onboard-view">
+    <div class="section-title mb-2">Provider Onboarding</div>
+    <div class="section-sub mb-3">Get verified and start earning</div>
+    
+    <div class="booking-card">
+      <h3><i class="ti ti-id-badge"></i> Personal Details</h3>
+      <div class="form-row"><label>Full Name</label><input type="text" placeholder="Rajesh Kumar"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-row"><label>Phone</label><input type="tel" placeholder="+91 9876543210"></div>
+        <div class="form-row"><label>Category</label><select><option>Electrician</option><option>Plumber</option><option>Cleaner</option><option>Carpenter</option><option>Painter</option></select></div>
+      </div>
+      <div class="form-row"><label>Service Area</label><input type="text" placeholder="Lucknow (5km radius)"></div>
+    </div>
+
+    <div class="booking-card">
+      <h3><i class="ti ti-file-certificate"></i> Document Verification</h3>
+      <div class="doc-status">
+        <div class="doc-item"><i class="ti ti-id" style="color:var(--primary)"></i><span class="doc-name">Aadhaar Card</span><span class="doc-status-badge doc-verified"><i class="ti ti-check"></i> Verified</span></div>
+        <div class="doc-item"><i class="ti ti-certificate" style="color:var(--primary)"></i><span class="doc-name">Trade License</span><span class="doc-status-badge doc-verified"><i class="ti ti-check"></i> Verified</span></div>
+        <div class="doc-item"><i class="ti ti-file-check" style="color:var(--warning)"></i><span class="doc-name">Background Check</span><span class="doc-status-badge doc-pending">Pending</span></div>
+      </div>
+      <div class="upload-zone mt-3" onclick="showToast('File upload opened','')">
+        <i class="ti ti-cloud-upload"></i>
+        <p>Drag & drop or click to upload documents</p>
+        <p style="font-size:11px;color:var(--gray-400);margin-top:4px">PDF, JPG, PNG · Max 5MB each</p>
+      </div>
+    </div>
+
+    <div class="booking-card">
+      <h3><i class="ti ti-crown"></i> Provider Subscription Plan</h3>
+      <div class="section-sub mb-3">Upgrade for higher search ranking and verified badge</div>
+      <div class="sub-cards">
+        <div class="sub-card">
+          <div class="sub-name">Basic</div>
+          <div class="sub-price">Free<span></span></div>
+          <div class="sub-feature"><i class="ti ti-check"></i>Listed in search</div>
+          <div class="sub-feature"><i class="ti ti-check"></i>Standard ranking</div>
+          <div class="sub-feature" style="color:var(--gray-300)"><i class="ti ti-x"></i>Verified badge</div>
+          <button class="btn btn-outline btn-sm w-full mt-3" onclick="showToast('Basic plan selected','')">Current Plan</button>
+        </div>
+        <div class="sub-card featured">
+          <div class="featured-badge">Most Popular</div>
+          <div class="sub-name">Pro</div>
+          <div class="sub-price">₹999<span>/mo</span></div>
+          <div class="sub-feature"><i class="ti ti-check"></i>Priority listing</div>
+          <div class="sub-feature"><i class="ti ti-check"></i>Verified badge</div>
+          <div class="sub-feature"><i class="ti ti-check"></i>Analytics access</div>
+          <button class="btn btn-primary btn-sm w-full mt-3" onclick="showToast('Pro plan activated! ✓','success')">Upgrade to Pro</button>
+        </div>
+        <div class="sub-card">
+          <div class="sub-name">Elite</div>
+          <div class="sub-price">₹1,999<span>/mo</span></div>
+          <div class="sub-feature"><i class="ti ti-check"></i>Top 3 placement</div>
+          <div class="sub-feature"><i class="ti ti-check"></i>Dedicated support</div>
+          <div class="sub-feature"><i class="ti ti-check"></i>Surge pricing access</div>
+          <button class="btn btn-outline btn-sm w-full mt-3" onclick="showToast('Elite plan enquiry sent','')">Contact Sales</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary w-full" onclick="showToast('Profile submitted for review!','success')"><i class="ti ti-send"></i> Submit for Verification</button>
+  </div>
+</div>
+
+<!-- ===== RECEIPT VIEW ===== -->
+<div class="view" id="view-receipt">
+  <div class="receipt-view">
+    <div class="receipt-card">
+      <div class="receipt-header">
+        <div class="receipt-check"><i class="ti ti-circle-check" style="font-size:26px"></i></div>
+        <h2>Service Completed</h2>
+        <p>Payment confirmed · Booking #FX-28914</p>
+      </div>
+      <div class="receipt-body">
+        <div class="invoice-badge"><i class="ti ti-file-invoice"></i> GST Invoice #INV-2026-0892</div>
+        <div style="font-size:11px;color:var(--gray-400);margin-bottom:14px">22 Jun 2026 · GSTIN: 09ABCDE1234F1Z5</div>
+        <div class="receipt-row"><span>Provider</span><span class="font-semibold">Rajesh Kumar (Electrician)</span></div>
+        <div class="receipt-row"><span>Service</span><span>Fan installation + Wiring check</span></div>
+        <div class="receipt-row"><span>Duration</span><span>1.5 hours</span></div>
+        <div class="divider"></div>
+        <div class="receipt-row"><span>Labour charges</span><span>₹600.00</span></div>
+        <div class="receipt-row"><span>Materials used</span><span>₹150.00</span></div>
+        <div class="receipt-row"><span>Convenience fee</span><span>₹50.00</span></div>
+        <div class="receipt-row discount"><span>Loyalty discount</span><span>–₹50.00</span></div>
+        <div class="receipt-row tax"><span>CGST (9%)</span><span>₹67.50</span></div>
+        <div class="receipt-row tax"><span>SGST (9%)</span><span>₹67.50</span></div>
+        <div class="receipt-row total"><span>Total Paid</span><span class="text-primary">₹885.00</span></div>
+        <div style="background:var(--success-light);border-radius:var(--radius);padding:10px;margin-top:12px;font-size:12px;color:var(--success);display:flex;gap:6px;align-items:center">
+          <i class="ti ti-check-circle"></i> Deposit ₹250 paid · Balance ₹635 charged on completion
+        </div>
+      </div>
+      <div class="receipt-footer">
+        <button class="receipt-action" onclick="showToast('Invoice downloaded','success')"><i class="ti ti-download"></i> Download GST Invoice</button>
+        <button class="receipt-action" onclick="showRatingModal()"><i class="ti ti-star"></i> Rate Service</button>
+        <button class="receipt-action" onclick="showToast('Refund request submitted','')"><i class="ti ti-refresh"></i> Refund</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .app -->
+
+<script src="script.js"></script>
+</html>
